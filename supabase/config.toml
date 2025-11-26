@@ -1,0 +1,4 @@
+project_id = "ggfaeehpjzcozqnhvugh"
+
+[functions.regenerate-energy]
+verify_jwt = false
