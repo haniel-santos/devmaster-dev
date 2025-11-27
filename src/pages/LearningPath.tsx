@@ -11,6 +11,7 @@ interface Challenge {
   title: string;
   description: string;
   order_index: number;
+  module_name: string;
 }
 
 interface UserProgress {

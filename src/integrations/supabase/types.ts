@@ -14,12 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          created_at: string | null
+          description: string
+          icon: string
+          id: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          icon: string
+          id?: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          requirement_type?: string
+          requirement_value?: number
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           created_at: string | null
           description: string
           difficulty: string | null
           id: string
+          is_practice: boolean | null
+          module_name: string | null
           order_index: number
           solution: string | null
           template_code: string | null
@@ -31,6 +63,8 @@ export type Database = {
           description: string
           difficulty?: string | null
           id?: string
+          is_practice?: boolean | null
+          module_name?: string | null
           order_index: number
           solution?: string | null
           template_code?: string | null
@@ -42,11 +76,37 @@ export type Database = {
           description?: string
           difficulty?: string | null
           id?: string
+          is_practice?: boolean | null
+          module_name?: string | null
           order_index?: number
           solution?: string | null
           template_code?: string | null
           test_code?: string
           title?: string
+        }
+        Relationships: []
+      }
+      energy_purchases: {
+        Row: {
+          id: string
+          item_type: string
+          item_value: number
+          purchased_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          item_type: string
+          item_value: number
+          purchased_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          item_type?: string
+          item_value?: number
+          purchased_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -56,6 +116,7 @@ export type Database = {
           id: string
           level: number | null
           name: string
+          points: number | null
           updated_at: string | null
         }
         Insert: {
@@ -63,6 +124,7 @@ export type Database = {
           id: string
           level?: number | null
           name: string
+          points?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -70,9 +132,39 @@ export type Database = {
           id?: string
           level?: number | null
           name?: string
+          points?: number | null
           updated_at?: string | null
         }
         Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_energy: {
         Row: {

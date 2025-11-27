@@ -9,6 +9,9 @@ import Dashboard from "./pages/Dashboard";
 import Challenges from "./pages/Challenges";
 import LearningPath from "./pages/LearningPath";
 import Profile from "./pages/Profile";
+import Ranking from "./pages/Ranking";
+import EnergyShop from "./pages/EnergyShop";
+import Practice from "./pages/Practice";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +29,9 @@ const App = () => (
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/learning-path" element={<LearningPath />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/ranking" element={<Ranking />} />
+          <Route path="/energy-shop" element={<EnergyShop />} />
+          <Route path="/practice" element={<Practice />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
