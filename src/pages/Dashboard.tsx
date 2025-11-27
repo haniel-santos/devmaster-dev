@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { Code, BookOpen, Trophy, User, Zap } from "lucide-react";
 import { EnergyBar } from "@/components/EnergyBar";
-import { Code2, Trophy, BookOpen, User, LogOut } from "lucide-react";
-import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
 interface UserEnergy {
   current_energy: number;
@@ -15,164 +14,120 @@ interface UserEnergy {
 const Dashboard = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
-  const [energy, setEnergy] = useState<UserEnergy>({ current_energy: 7, max_energy: 7 });
-  const [isLoading, setIsLoading] = useState(true);
+  const [userLevel, setUserLevel] = useState(1);
+  const [userEnergy, setUserEnergy] = useState<UserEnergy>({ current_energy: 7, max_energy: 7 });
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
       }
 
-      // Get user profile
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name")
+        .select("name, level")
         .eq("id", session.user.id)
         .single();
 
       if (profile) {
         setUserName(profile.name);
+        setUserLevel(profile.level || 1);
       }
 
-      // Get user energy
-      const { data: energyData } = await supabase
+      const { data: energy } = await supabase
         .from("user_energy")
         .select("current_energy, max_energy")
         .eq("user_id", session.user.id)
         .single();
 
-      if (energyData) {
-        setEnergy(energyData);
+      if (energy) {
+        setUserEnergy(energy);
       }
-
-      setIsLoading(false);
     };
 
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "SIGNED_OUT") {
-          navigate("/auth");
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    getUser();
   }, [navigate]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast.success("Logout realizado com sucesso!");
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Carregando...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
-      <div className="container max-w-4xl mx-auto p-4 space-y-6">
-        {/* Header with Energy */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Olá, {userName}! 👋</h1>
-              <p className="text-muted-foreground">Pronto para aprender hoje?</p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6">
+      <div className="max-w-4xl mx-auto">
+        <Card className="p-8 mb-6 bg-card/80 backdrop-blur shadow-card">
+          <div className="text-center">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl font-bold text-primary">
+                {userName.charAt(0).toUpperCase()}
+              </span>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="w-5 h-5" />
-            </Button>
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              Olá, {userName}!
+            </h2>
+            <p className="text-muted-foreground">Nível {userLevel} • Pronto para aprender hoje?</p>
           </div>
-          <EnergyBar 
-            currentEnergy={energy.current_energy} 
-            maxEnergy={energy.max_energy}
-          />
-        </div>
 
-        {/* Menu Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card 
-            className="hover:shadow-card-lg transition-all cursor-pointer border-2 border-transparent hover:border-primary"
+          <div className="mt-6">
+            <EnergyBar
+              currentEnergy={userEnergy.current_energy}
+              maxEnergy={userEnergy.max_energy}
+            />
+          </div>
+        </Card>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <Button
             onClick={() => navigate("/challenges")}
+            className="h-32 text-lg"
+            variant="default"
           >
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-success-gradient flex items-center justify-center">
-                  <Code2 className="w-7 h-7 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-foreground">Desafios</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Resolva problemas e aprenda programando
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="hover:shadow-card-lg transition-all cursor-pointer border-2 border-transparent hover:border-secondary"
+            <Code className="mr-2 h-6 w-6" />
+            Desafios
+          </Button>
+          
+          <Button
             onClick={() => navigate("/learning-path")}
+            className="h-32 text-lg"
+            variant="default"
           >
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-secondary to-secondary/80 flex items-center justify-center">
-                  <BookOpen className="w-7 h-7 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-foreground">Trilha de Aprendizagem</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Acompanhe seu progresso
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="hover:shadow-card-lg transition-all cursor-pointer border-2 border-transparent hover:border-accent opacity-60"
+            <BookOpen className="mr-2 h-6 w-6" />
+            Trilha de Aprendizado
+          </Button>
+          
+          <Button
+            onClick={() => navigate("/practice")}
+            className="h-32 text-lg"
+            variant="outline"
           >
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center">
-                  <Trophy className="w-7 h-7 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-foreground">Ranking</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Em breve...
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <Code className="mr-2 h-6 w-6" />
+            Modo Treino
+          </Button>
 
-          <Card 
-            className="hover:shadow-card-lg transition-all cursor-pointer border-2 border-transparent hover:border-primary"
+          <Button
+            onClick={() => navigate("/ranking")}
+            className="h-32 text-lg"
+            variant="outline"
+          >
+            <Trophy className="mr-2 h-6 w-6" />
+            Ranking
+          </Button>
+          
+          <Button
+            onClick={() => navigate("/energy-shop")}
+            className="h-32 text-lg"
+            variant="outline"
+          >
+            <Zap className="mr-2 h-6 w-6" />
+            Loja de Energia
+          </Button>
+          
+          <Button
             onClick={() => navigate("/profile")}
+            className="h-32 text-lg"
+            variant="outline"
           >
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                  <User className="w-7 h-7 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-foreground">Perfil</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Veja suas estatísticas
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <User className="mr-2 h-6 w-6" />
+            Perfil
+          </Button>
         </div>
       </div>
     </div>
