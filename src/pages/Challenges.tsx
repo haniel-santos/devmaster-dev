@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lightbulb } from "lucide-react";
 import { EnergyBar } from "@/components/EnergyBar";
 import { EnergyDepletedModal } from "@/components/EnergyDepletedModal";
 import { AchievementNotification } from "@/components/AchievementNotification";
@@ -16,6 +16,7 @@ interface Challenge {
   description: string;
   template_code: string;
   test_code: string;
+  hints?: string[];
 }
 
 interface UserEnergy {
@@ -33,6 +34,7 @@ const Challenges = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [showEnergyModal, setShowEnergyModal] = useState(false);
   const [unlockedAchievement, setUnlockedAchievement] = useState<any>(null);
+  const [revealedHints, setRevealedHints] = useState<number>(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -258,6 +260,33 @@ const Challenges = () => {
     }
   };
 
+  const revealHint = async () => {
+    if (!selectedChallenge || !userId || !selectedChallenge.hints) return;
+
+    if (!userEnergy || userEnergy.current_energy <= 0) {
+      setShowEnergyModal(true);
+      return;
+    }
+
+    if (revealedHints >= selectedChallenge.hints.length) {
+      toast.info("Não há mais dicas disponíveis!");
+      return;
+    }
+
+    // Consumir energia
+    await supabase
+      .from("user_energy")
+      .update({ current_energy: userEnergy.current_energy - 1 })
+      .eq("user_id", userId);
+
+    setUserEnergy({ ...userEnergy, current_energy: userEnergy.current_energy - 1 });
+    setRevealedHints(revealedHints + 1);
+
+    toast.success("Dica revelada!", {
+      description: selectedChallenge.hints[revealedHints],
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6">
       <AchievementNotification
@@ -296,6 +325,7 @@ const Challenges = () => {
                 onClick={() => {
                   setSelectedChallenge(challenge);
                   setCode(challenge.template_code || "");
+                  setRevealedHints(0);
                 }}
               >
                 <h3 className="font-semibold text-foreground">{challenge.title}</h3>
@@ -309,9 +339,37 @@ const Challenges = () => {
                 <h2 className="text-2xl font-bold text-foreground mb-2">
                   {selectedChallenge.title}
                 </h2>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   {selectedChallenge.description}
                 </p>
+                
+                {selectedChallenge.hints && selectedChallenge.hints.length > 0 && (
+                  <div className="mt-4">
+                    <Button
+                      onClick={revealHint}
+                      variant="outline"
+                      size="sm"
+                      disabled={!userEnergy || userEnergy.current_energy <= 0 || revealedHints >= selectedChallenge.hints.length}
+                      className="mb-3"
+                    >
+                      <Lightbulb className="mr-2 h-4 w-4" />
+                      Ver Dica ({revealedHints}/{selectedChallenge.hints.length}) - 1 energia
+                    </Button>
+                    
+                    {revealedHints > 0 && (
+                      <div className="space-y-2">
+                        {selectedChallenge.hints.slice(0, revealedHints).map((hint, index) => (
+                          <div key={index} className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                            <p className="text-sm text-foreground flex items-start gap-2">
+                              <Lightbulb className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                              <span>{hint}</span>
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </Card>
 
               <Card className="p-6 bg-card">
