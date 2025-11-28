@@ -49,6 +49,7 @@ export type Database = {
           created_at: string | null
           description: string
           difficulty: string | null
+          hints: string[] | null
           id: string
           is_practice: boolean | null
           module_name: string | null
@@ -62,6 +63,7 @@ export type Database = {
           created_at?: string | null
           description: string
           difficulty?: string | null
+          hints?: string[] | null
           id?: string
           is_practice?: boolean | null
           module_name?: string | null
@@ -75,6 +77,7 @@ export type Database = {
           created_at?: string | null
           description?: string
           difficulty?: string | null
+          hints?: string[] | null
           id?: string
           is_practice?: boolean | null
           module_name?: string | null
