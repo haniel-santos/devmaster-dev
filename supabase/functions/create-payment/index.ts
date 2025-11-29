@@ -17,20 +17,31 @@ serve(async (req) => {
       throw new Error('No authorization header');
     }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    // Extrair e decodificar JWT token para pegar user_id
+    const token = authHeader.replace('Bearer ', '');
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid token format');
+    }
+    
+    const payload = JSON.parse(atob(parts[1]));
+    const userId = payload.sub;
+    
+    if (!userId) {
       throw new Error('User not authenticated');
     }
 
+    console.log('Creating payment for user:', userId);
+
     const { item_type, item_value, title, description, price } = await req.json();
 
-    console.log('Creating payment preference for user:', user.id);
+    // Criar cliente Supabase com service role para operações no banco
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    
 
     const mercadoPagoToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
     if (!mercadoPagoToken) {
@@ -55,7 +66,7 @@ serve(async (req) => {
       },
       auto_return: 'approved',
       external_reference: JSON.stringify({
-        user_id: user.id,
+        user_id: userId,
         item_type: item_type,
         item_value: item_value,
       }),
@@ -82,7 +93,7 @@ serve(async (req) => {
 
     // Registrar compra no banco
     await supabase.from('energy_purchases').insert({
-      user_id: user.id,
+      user_id: userId,
       item_type: item_type,
       item_value: item_value,
     });
