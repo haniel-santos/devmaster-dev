@@ -54,7 +54,8 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-foreground">Dev Master</h1>
           <ThemeToggle />
         </div>
         <Card className="p-8 mb-6 bg-card/80 backdrop-blur shadow-card">
