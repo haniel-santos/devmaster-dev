@@ -27,6 +27,28 @@ const EnergyShop = () => {
       }
     };
     getUser();
+
+    // Verificar status do pagamento na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    
+    if (paymentStatus === 'success') {
+      toast.success("Pagamento aprovado!", {
+        description: "Sua energia foi restaurada",
+      });
+      // Limpar parâmetros da URL
+      window.history.replaceState({}, '', '/energy-shop');
+    } else if (paymentStatus === 'failure') {
+      toast.error("Pagamento recusado", {
+        description: "Tente novamente ou use outro método",
+      });
+      window.history.replaceState({}, '', '/energy-shop');
+    } else if (paymentStatus === 'pending') {
+      toast.info("Pagamento pendente", {
+        description: "Aguardando confirmação",
+      });
+      window.history.replaceState({}, '', '/energy-shop');
+    }
   }, []);
 
   const shopItems: ShopItem[] = [
@@ -59,16 +81,43 @@ const EnergyShop = () => {
   const handlePurchase = async (item: ShopItem) => {
     if (!userId) return;
 
-    // Registrar compra fictícia
-    await supabase.from("energy_purchases").insert({
-      user_id: userId,
-      item_type: item.type,
-      item_value: item.value,
-    });
+    try {
+      toast.loading("Processando pagamento...");
 
-    toast.success(`${item.title} adquirido!`, {
-      description: "Funcionalidade disponível em breve",
-    });
+      // Definir preços para cada item
+      const prices = {
+        energy_1: 5.00,
+        energy_full: 15.00,
+        buff_regen: 20.00,
+      };
+
+      const price = prices[item.id as keyof typeof prices] || 10.00;
+
+      // Criar preferência de pagamento no Mercado Pago
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          item_type: item.type,
+          item_value: item.value,
+          title: item.title,
+          description: item.description,
+          price: price,
+        },
+      });
+
+      if (error) throw error;
+
+      // Redirecionar para checkout do Mercado Pago
+      if (data?.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        throw new Error('Link de pagamento não recebido');
+      }
+    } catch (error) {
+      console.error('Erro ao processar pagamento:', error);
+      toast.error("Erro ao processar pagamento", {
+        description: (error as Error).message || "Tente novamente mais tarde",
+      });
+    }
   };
 
   return (
@@ -125,7 +174,7 @@ const EnergyShop = () => {
 
         <Card className="p-4 mt-6 bg-muted/50">
           <p className="text-sm text-muted-foreground text-center">
-            💡 Esta é uma versão demonstrativa. Pagamentos reais serão implementados no futuro.
+            💳 Pagamentos processados via Mercado Pago de forma segura.
           </p>
         </Card>
       </div>
