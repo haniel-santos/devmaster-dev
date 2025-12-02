@@ -116,24 +116,33 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          current_streak: number | null
           id: string
+          last_activity_date: string | null
           level: number | null
+          longest_streak: number | null
           name: string
           points: number | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          current_streak?: number | null
           id: string
+          last_activity_date?: string | null
           level?: number | null
+          longest_streak?: number | null
           name: string
           points?: number | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          current_streak?: number | null
           id?: string
+          last_activity_date?: string | null
           level?: number | null
+          longest_streak?: number | null
           name?: string
           points?: number | null
           updated_at?: string | null
@@ -254,7 +263,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_user_streak: { Args: { p_user_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

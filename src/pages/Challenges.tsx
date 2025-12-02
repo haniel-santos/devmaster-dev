@@ -203,6 +203,9 @@ const Challenges = () => {
             });
         }
 
+        // Atualizar streak do usuário
+        await supabase.rpc('update_user_streak', { p_user_id: userId });
+
         toast.success("Desafio concluído!", {
           description: "Você ganhou +25 XP e +1 energia!",
         });

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Code, BookOpen, Trophy, User, Zap } from "lucide-react";
 import { EnergyBar } from "@/components/EnergyBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { StreakDisplay } from "@/components/StreakDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 
@@ -12,11 +13,17 @@ interface UserEnergy {
   max_energy: number;
 }
 
+interface UserStreak {
+  current_streak: number;
+  longest_streak: number;
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [userLevel, setUserLevel] = useState(1);
   const [userEnergy, setUserEnergy] = useState<UserEnergy>({ current_energy: 7, max_energy: 7 });
+  const [userStreak, setUserStreak] = useState<UserStreak>({ current_streak: 0, longest_streak: 0 });
 
   useEffect(() => {
     const getUser = async () => {
@@ -28,13 +35,17 @@ const Dashboard = () => {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name, level")
+        .select("name, level, current_streak, longest_streak")
         .eq("id", session.user.id)
         .single();
 
       if (profile) {
         setUserName(profile.name);
         setUserLevel(profile.level || 1);
+        setUserStreak({
+          current_streak: profile.current_streak || 0,
+          longest_streak: profile.longest_streak || 0,
+        });
       }
 
       const { data: energy } = await supabase
@@ -75,10 +86,14 @@ const Dashboard = () => {
             <p className="text-muted-foreground">Nível {userLevel} • Pronto para aprender hoje?</p>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
             <EnergyBar
               currentEnergy={userEnergy.current_energy}
               maxEnergy={userEnergy.max_energy}
+            />
+            <StreakDisplay
+              currentStreak={userStreak.current_streak}
+              longestStreak={userStreak.longest_streak}
             />
           </div>
         </Card>
