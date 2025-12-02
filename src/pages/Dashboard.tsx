@@ -58,7 +58,7 @@ const Dashboard = () => {
           <ThemeToggle />
         </div>
         <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 bg-clip-text text-transparent">
             Dev Master
           </h1>
         </div>
