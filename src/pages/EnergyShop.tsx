@@ -136,7 +136,7 @@ const EnergyShop = () => {
           item_value: 30,
           title: "Dev Master Premium",
           description: "Assinatura mensal com benefícios exclusivos",
-          price: 29.90,
+          price: 19.99,
         },
       });
 
@@ -203,8 +203,8 @@ const EnergyShop = () => {
               <div className="flex flex-col items-center justify-center bg-card/50 rounded-xl p-6">
                 <span className="text-sm text-muted-foreground mb-1">Por apenas</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-amber-500">R$29</span>
-                  <span className="text-xl text-amber-500/70">,90</span>
+                  <span className="text-4xl font-bold text-amber-500">R$19</span>
+                  <span className="text-xl text-amber-500/70">,99</span>
                   <span className="text-sm text-muted-foreground">/mês</span>
                 </div>
                 <Button 
