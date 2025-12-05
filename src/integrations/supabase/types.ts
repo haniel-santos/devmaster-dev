@@ -89,6 +89,35 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_challenges: {
+        Row: {
+          challenge_date: string
+          challenge_id: string
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          challenge_date?: string
+          challenge_id: string
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          challenge_date?: string
+          challenge_id?: string
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       energy_purchases: {
         Row: {
           id: string
@@ -178,6 +207,33 @@ export type Database = {
           },
         ]
       }
+      user_daily_progress: {
+        Row: {
+          challenge_date: string
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          challenge_date?: string
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          challenge_date?: string
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_energy: {
         Row: {
           current_energy: number | null
@@ -263,6 +319,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_or_create_daily_challenge: { Args: never; Returns: string }
       update_user_streak: { Args: { p_user_id: string }; Returns: undefined }
     }
     Enums: {

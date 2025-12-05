@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Lightbulb } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Lightbulb, Calendar, Zap } from "lucide-react";
 import { EnergyBar } from "@/components/EnergyBar";
 import { EnergyDepletedModal } from "@/components/EnergyDepletedModal";
 import { AchievementNotification } from "@/components/AchievementNotification";
@@ -26,6 +27,9 @@ interface UserEnergy {
 
 const Challenges = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const dailyChallengeId = searchParams.get("daily");
+  
   const [userId, setUserId] = useState<string>("");
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
@@ -35,6 +39,7 @@ const Challenges = () => {
   const [showEnergyModal, setShowEnergyModal] = useState(false);
   const [unlockedAchievement, setUnlockedAchievement] = useState<any>(null);
   const [revealedHints, setRevealedHints] = useState<number>(0);
+  const [isDailyChallenge, setIsDailyChallenge] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,7 +58,16 @@ const Challenges = () => {
 
       if (challengesData) {
         setChallenges(challengesData);
-        if (challengesData.length > 0) {
+        
+        // Se vier com daily param, seleciona o desafio diário
+        if (dailyChallengeId) {
+          const dailyChallenge = challengesData.find(c => c.id === dailyChallengeId);
+          if (dailyChallenge) {
+            setSelectedChallenge(dailyChallenge);
+            setCode(dailyChallenge.template_code || "");
+            setIsDailyChallenge(true);
+          }
+        } else if (challengesData.length > 0) {
           setSelectedChallenge(challengesData[0]);
           setCode(challengesData[0].template_code || "");
         }
@@ -71,7 +85,7 @@ const Challenges = () => {
     };
 
     fetchData();
-  }, [navigate]);
+  }, [navigate, dailyChallengeId]);
 
   const checkAchievements = async (challengeCompleted: boolean, attempts: number) => {
     if (!userId) return;
@@ -206,9 +220,59 @@ const Challenges = () => {
         // Atualizar streak do usuário
         await supabase.rpc('update_user_streak', { p_user_id: userId });
 
-        toast.success("Desafio concluído!", {
-          description: "Você ganhou +25 XP e +1 energia!",
-        });
+        // Se for desafio diário, dar +1 energia extra
+        if (isDailyChallenge && dailyChallengeId) {
+          const today = new Date().toISOString().split('T')[0];
+          
+          // Verificar se já completou o desafio diário hoje
+          const { data: dailyProgress } = await supabase
+            .from("user_daily_progress")
+            .select("completed")
+            .eq("user_id", userId)
+            .eq("challenge_date", today)
+            .maybeSingle();
+
+          if (!dailyProgress?.completed) {
+            // Marcar como completo
+            await supabase
+              .from("user_daily_progress")
+              .upsert({
+                user_id: userId,
+                challenge_date: today,
+                completed: true,
+                completed_at: new Date().toISOString(),
+              });
+
+            // Dar +1 energia bônus
+            const { data: currentEnergy } = await supabase
+              .from("user_energy")
+              .select("current_energy, max_energy")
+              .eq("user_id", userId)
+              .single();
+
+            if (currentEnergy) {
+              const newEnergy = Math.min(currentEnergy.current_energy + 1, currentEnergy.max_energy);
+              await supabase
+                .from("user_energy")
+                .update({ current_energy: newEnergy })
+                .eq("user_id", userId);
+
+              setUserEnergy({ ...currentEnergy, current_energy: newEnergy });
+
+              toast.success("Desafio Diário Completo! 🎉", {
+                description: "Você ganhou +25 XP e +1 energia bônus!",
+              });
+            }
+          } else {
+            toast.success("Desafio concluído!", {
+              description: "Você ganhou +25 XP e +1 energia!",
+            });
+          }
+        } else {
+          toast.success("Desafio concluído!", {
+            description: "Você ganhou +25 XP e +1 energia!",
+          });
+        }
 
         await checkAchievements(true, 1);
       } else {
@@ -329,6 +393,7 @@ const Challenges = () => {
                   setSelectedChallenge(challenge);
                   setCode(challenge.template_code || "");
                   setRevealedHints(0);
+                  setIsDailyChallenge(challenge.id === dailyChallengeId);
                 }}
               >
                 <h3 className="font-semibold text-foreground">{challenge.title}</h3>
@@ -339,9 +404,18 @@ const Challenges = () => {
           {selectedChallenge && (
             <div className="space-y-4">
               <Card className="p-6 bg-card">
-                <h2 className="text-2xl font-bold text-foreground mb-2">
-                  {selectedChallenge.title}
-                </h2>
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-2xl font-bold text-foreground">
+                    {selectedChallenge.title}
+                  </h2>
+                  {isDailyChallenge && (
+                    <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      Desafio do Dia
+                      <Zap className="h-3 w-3 ml-1" />
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-muted-foreground mb-4">
                   {selectedChallenge.description}
                 </p>

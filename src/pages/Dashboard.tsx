@@ -5,6 +5,7 @@ import { Code, BookOpen, Trophy, User, Zap } from "lucide-react";
 import { EnergyBar } from "@/components/EnergyBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { StreakDisplay } from "@/components/StreakDisplay";
+import { DailyChallengeCard } from "@/components/DailyChallengeCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 
@@ -20,6 +21,7 @@ interface UserStreak {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
   const [userLevel, setUserLevel] = useState(1);
   const [userEnergy, setUserEnergy] = useState<UserEnergy>({ current_energy: 7, max_energy: 7 });
@@ -32,6 +34,8 @@ const Dashboard = () => {
         navigate("/auth");
         return;
       }
+
+      setUserId(session.user.id);
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -97,6 +101,12 @@ const Dashboard = () => {
             />
           </div>
         </Card>
+
+        {userId && (
+          <div className="mb-6">
+            <DailyChallengeCard userId={userId} />
+          </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-2">
           <Button
