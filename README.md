@@ -36,6 +36,7 @@ Dev Master é uma aplicação web que transforma o aprendizado de JavaScript em 
 - Ranking global com medalhas (Ouro, Prata, Bronze)
 - Conquistas desbloqueáveis
 - Sistema de streak (dias consecutivos)
+- **Desafio Diário**: Novo desafio a cada dia com recompensa de +1 energia bônus
 
 ### 💎 Monetização
 - Loja de energia com compras via Mercado Pago
