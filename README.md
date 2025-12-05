@@ -1,73 +1,132 @@
-# Welcome to your Lovable project
+# 🎮 Dev Master
 
-## Project info
+Uma plataforma gamificada de aprendizado de programação JavaScript, inspirada em apps como Duolingo, Mimo e SoloLearn.
 
-**URL**: https://lovable.dev/projects/d753d363-717a-4663-b06c-8f57a8a1863e
+![Dev Master](https://img.shields.io/badge/Dev%20Master-Aprenda%20JavaScript-yellow?style=for-the-badge)
 
-## How can I edit this code?
+## 📋 Sobre o Projeto
 
-There are several ways of editing your application.
+Dev Master é uma aplicação web que transforma o aprendizado de JavaScript em uma experiência de jogo envolvente. Os usuários progridem através de módulos de aprendizado, completam desafios de código, ganham pontos e competem em rankings.
 
-**Use Lovable**
+## ✨ Funcionalidades
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d753d363-717a-4663-b06c-8f57a8a1863e) and start prompting.
+### 🎯 Sistema de Desafios
+- Desafios de código com validação automática
+- Editor JavaScript integrado com execução de código
+- Feedback instantâneo sobre acertos e erros
+- Sistema de dicas (consome energia)
 
-Changes made via Lovable will be committed automatically to this repo.
+### ⚡ Sistema de Energia
+- 7 barras de energia máxima
+- Cada execução de código consome 1 energia
+- Regeneração automática ao longo do tempo
+- Loja de energia para recargas
 
-**Use your preferred IDE**
+### 📚 Trilha de Aprendizado
+- **Módulo 1**: Lógica de Programação
+- **Módulo 2**: Arrays
+- **Módulo 3**: Funções
+- **Módulo 4**: Objetos
+- **Módulo 5**: Mini-projetos JS
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🏆 Gamificação
+- Sistema de pontos e níveis (+25 pontos por desafio)
+- Ranking global com medalhas (Ouro, Prata, Bronze)
+- Conquistas desbloqueáveis
+- Sistema de streak (dias consecutivos)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 💎 Monetização
+- Loja de energia com compras via Mercado Pago
+- Assinatura Premium (R$19,99/mês) com energia ilimitada
 
-Follow these steps:
+### 🔐 Autenticação
+- Login com email/senha
+- Login com Google OAuth
+- Recuperação de senha
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🛠️ Tecnologias
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- **Frontend**: React 18, TypeScript, Vite
+- **Estilização**: Tailwind CSS, shadcn/ui
+- **Backend**: Supabase (Lovable Cloud)
+- **Banco de Dados**: PostgreSQL
+- **Autenticação**: Supabase Auth
+- **Pagamentos**: Mercado Pago
+- **Deploy**: Lovable
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🗄️ Estrutura do Banco de Dados
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+| Tabela | Descrição |
+|--------|-----------|
+| `profiles` | Dados do usuário (nome, nível, pontos, streak) |
+| `challenges` | Desafios de código com testes |
+| `user_progress` | Progresso do usuário nos desafios |
+| `user_energy` | Sistema de energia do usuário |
+| `achievements` | Lista de conquistas disponíveis |
+| `user_achievements` | Conquistas desbloqueadas |
+| `energy_purchases` | Histórico de compras |
+
+## 🚀 Como Executar
+
+### Pré-requisitos
+- Node.js 18+
+- npm ou bun
+
+### Instalação
+
+```bash
+# Clone o repositório
+git clone <URL_DO_REPOSITORIO>
+
+# Entre na pasta do projeto
+cd dev-master
+
+# Instale as dependências
+npm install
+
+# Execute o projeto
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Variáveis de Ambiente
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+O projeto utiliza Lovable Cloud, que configura automaticamente as variáveis de ambiente necessárias:
 
-**Use GitHub Codespaces**
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📱 Páginas
 
-## What technologies are used for this project?
+| Rota | Descrição |
+|------|-----------|
+| `/` | Landing page |
+| `/auth` | Login e cadastro |
+| `/dashboard` | Menu principal |
+| `/challenges` | Lista de desafios |
+| `/learning-path` | Trilha de aprendizado |
+| `/practice` | Modo prática (sem consumo de energia) |
+| `/ranking` | Ranking global |
+| `/profile` | Perfil do usuário |
+| `/energy-shop` | Loja de energia |
 
-This project is built with:
+## 🎨 Design
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- Design minimalista inspirado em apps educacionais
+- Tema claro/escuro
+- Responsivo para mobile e desktop
+- Animações e feedback visual
 
-## How can I deploy this project?
+## 🔒 Segurança
 
-Simply open [Lovable](https://lovable.dev/projects/d753d363-717a-4663-b06c-8f57a8a1863e) and click on Share -> Publish.
+- Row Level Security (RLS) em todas as tabelas
+- Validação de código no servidor via Edge Functions
+- Autenticação segura com Supabase Auth
+- Webhooks seguros para pagamentos
 
-## Can I connect a custom domain to my Lovable project?
+## 📄 Licença
 
-Yes, you can!
+Este projeto foi desenvolvido com [Lovable](https://lovable.dev).
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+**Dev Master** - Aprenda JavaScript de forma divertida! 🚀
