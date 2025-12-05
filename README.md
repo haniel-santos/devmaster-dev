@@ -4,7 +4,7 @@ Uma plataforma gamificada de aprendizado de programação JavaScript, inspirada 
 
 ![Dev Master](https://img.shields.io/badge/Dev%20Master-Aprenda%20JavaScript-yellow?style=for-the-badge)
 
-🔗 **Demo ao vivo**: [https://d753d363-717a-4663-b06c-8f57a8a1863e.lovableproject.com](https://d753d363-717a-4663-b06c-8f57a8a1863e.lovableproject.com)
+🔗 **Demo ao vivo**: [https://d753d363-717a-4663-b06c-8f57a8a1863e.lovableproject.com]((https://devmaster-dev.lovable.app))
 
 ## 📋 Sobre o Projeto
 
