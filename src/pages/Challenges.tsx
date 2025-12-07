@@ -16,7 +16,6 @@ interface Challenge {
   title: string;
   description: string;
   template_code: string;
-  test_code: string;
   hints?: string[];
 }
 
@@ -51,9 +50,10 @@ const Challenges = () => {
 
       setUserId(session.user.id);
 
+      // Fetch challenges without test_code and solution (security)
       const { data: challengesData } = await supabase
         .from("challenges")
-        .select("*")
+        .select("id, title, description, template_code, hints, order_index")
         .order("order_index");
 
       if (challengesData) {
@@ -157,11 +157,28 @@ const Challenges = () => {
 
       setUserEnergy({ ...userEnergy, current_energy: userEnergy.current_energy - 1 });
 
-      // Executar o código
-      const testFunc = new Function(code + "\n" + selectedChallenge.test_code);
-      const result = testFunc();
+      // Validate code on the server (secure)
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Sessão expirada. Faça login novamente.");
+        navigate("/auth");
+        return;
+      }
 
-      if (result === true) {
+      const response = await supabase.functions.invoke('validate-code', {
+        body: {
+          challengeId: selectedChallenge.id,
+          userCode: code,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Erro ao validar código');
+      }
+
+      const { success, error: codeError } = response.data;
+
+      if (success) {
         // Restaurar energia ao completar desafio
         await supabase
           .from("user_energy")
@@ -276,9 +293,10 @@ const Challenges = () => {
 
         await checkAchievements(true, 1);
       } else {
-        throw new Error("Teste falhou");
+        throw new Error(codeError || "Teste falhou");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error;
       // Deduzir pontos por erro (-5)
       const { data: profile } = await supabase
         .from("profiles")
@@ -294,7 +312,7 @@ const Challenges = () => {
         .eq("id", userId);
 
       toast.error("Código incorreto", {
-        description: error.message || "Você perdeu 5 XP. Tente novamente!",
+        description: err.message || "Você perdeu 5 XP. Tente novamente!",
       });
     } finally {
       // Incrementar tentativas
