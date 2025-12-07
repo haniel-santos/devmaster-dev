@@ -116,6 +116,13 @@ export type Database = {
             referencedRelation: "challenges"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "daily_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       energy_purchases: {
@@ -306,6 +313,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "user_progress_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_progress_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -316,7 +330,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      challenges_public: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          hints: string[] | null
+          id: string | null
+          is_practice: boolean | null
+          module_name: string | null
+          order_index: number | null
+          template_code: string | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          hints?: string[] | null
+          id?: string | null
+          is_practice?: boolean | null
+          module_name?: string | null
+          order_index?: number | null
+          template_code?: string | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          hints?: string[] | null
+          id?: string | null
+          is_practice?: boolean | null
+          module_name?: string | null
+          order_index?: number | null
+          template_code?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_or_create_daily_challenge: { Args: never; Returns: string }
