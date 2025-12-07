@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.mercado-pago-webhook]
 verify_jwt = false
+
+[functions.validate-code]
+verify_jwt = true
