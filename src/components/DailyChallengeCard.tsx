@@ -37,9 +37,9 @@ export const DailyChallengeCard = ({ userId }: DailyChallengeCardProps) => {
         }
 
         if (challengeId) {
-          // Busca os detalhes do desafio
+          // Busca os detalhes do desafio usando a view segura
           const { data: challengeData } = await supabase
-            .from("challenges")
+            .from("challenges_public")
             .select("id, title, description, difficulty")
             .eq("id", challengeId)
             .maybeSingle();

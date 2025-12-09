@@ -90,7 +90,7 @@ const Profile = () => {
         .eq("user_id", session.user.id);
 
       const { data: challengesData } = await supabase
-        .from("challenges")
+        .from("challenges_public")
         .select("id");
 
       if (progressData && challengesData) {

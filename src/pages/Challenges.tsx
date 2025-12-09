@@ -50,9 +50,9 @@ const Challenges = () => {
 
       setUserId(session.user.id);
 
-      // Fetch challenges without test_code and solution (security)
+      // Fetch challenges using secure view (no test_code or solution)
       const { data: challengesData } = await supabase
-        .from("challenges")
+        .from("challenges_public")
         .select("id, title, description, template_code, hints, order_index")
         .order("order_index");
 
