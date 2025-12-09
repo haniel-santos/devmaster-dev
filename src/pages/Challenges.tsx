@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Lightbulb, Calendar, Zap } from "lucide-react";
+import { ArrowLeft, Lightbulb, Calendar, Zap, CheckCircle } from "lucide-react";
 import { EnergyBar } from "@/components/EnergyBar";
 import { EnergyDepletedModal } from "@/components/EnergyDepletedModal";
 import { AchievementNotification } from "@/components/AchievementNotification";
@@ -48,6 +48,7 @@ const Challenges = () => {
   const [unlockedAchievement, setUnlockedAchievement] = useState<any>(null);
   const [revealedHints, setRevealedHints] = useState<number>(0);
   const [isDailyChallenge, setIsDailyChallenge] = useState(false);
+  const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,6 +91,17 @@ const Challenges = () => {
 
       if (energyData) {
         setUserEnergy(energyData);
+      }
+
+      // Fetch user progress to know which challenges are completed
+      const { data: progressData } = await supabase
+        .from("user_progress")
+        .select("challenge_id")
+        .eq("user_id", session.user.id)
+        .eq("completed", true);
+
+      if (progressData) {
+        setCompletedChallenges(new Set(progressData.map(p => p.challenge_id)));
       }
     };
 
@@ -300,6 +312,9 @@ const Challenges = () => {
           });
         }
 
+        // Update local completed challenges state
+        setCompletedChallenges(prev => new Set([...prev, selectedChallenge.id]));
+
         await checkAchievements(true, 1);
       } else {
         throw new Error(codeError || "Teste falhou");
@@ -427,24 +442,34 @@ const Challenges = () => {
                     </Badge>
                   </div>
                   
-                  {filteredChallenges.map((challenge) => (
-                    <Card
-                      key={challenge.id}
-                      className={`p-3 cursor-pointer transition-all ${
-                        selectedChallenge?.id === challenge.id
-                          ? "border-2 border-primary bg-primary/5"
-                          : "hover:shadow-lg hover:bg-muted/50"
-                      }`}
-                      onClick={() => {
-                        setSelectedChallenge(challenge);
-                        setCode(challenge.template_code || "");
-                        setRevealedHints(0);
-                        setIsDailyChallenge(challenge.id === dailyChallengeId);
-                      }}
-                    >
-                      <h3 className="font-medium text-sm text-foreground">{challenge.title}</h3>
-                    </Card>
-                  ))}
+                  {filteredChallenges.map((challenge) => {
+                    const isCompleted = completedChallenges.has(challenge.id);
+                    return (
+                      <Card
+                        key={challenge.id}
+                        className={`p-3 cursor-pointer transition-all ${
+                          selectedChallenge?.id === challenge.id
+                            ? "border-2 border-primary bg-primary/5"
+                            : isCompleted
+                            ? "border-green-500/30 bg-green-500/5 hover:bg-green-500/10"
+                            : "hover:shadow-lg hover:bg-muted/50"
+                        }`}
+                        onClick={() => {
+                          setSelectedChallenge(challenge);
+                          setCode(challenge.template_code || "");
+                          setRevealedHints(0);
+                          setIsDailyChallenge(challenge.id === dailyChallengeId);
+                        }}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-medium text-sm text-foreground">{challenge.title}</h3>
+                          {isCompleted && (
+                            <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
+                          )}
+                        </div>
+                      </Card>
+                    );
+                  })}
                 </div>
               );
             })}
