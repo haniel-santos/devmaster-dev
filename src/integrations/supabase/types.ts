@@ -371,6 +371,21 @@ export type Database = {
       }
     }
     Functions: {
+      get_challenges_public: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          difficulty: string
+          hints: string[]
+          id: string
+          is_practice: boolean
+          module_name: string
+          order_index: number
+          template_code: string
+          title: string
+        }[]
+      }
       get_or_create_daily_challenge: { Args: never; Returns: string }
       update_user_streak: { Args: { p_user_id: string }; Returns: undefined }
     }
