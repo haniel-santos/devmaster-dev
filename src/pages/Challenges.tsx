@@ -17,12 +17,21 @@ interface Challenge {
   description: string;
   template_code: string;
   hints?: string[];
+  difficulty?: string;
 }
 
 interface UserEnergy {
   current_energy: number;
   max_energy: number;
 }
+
+type DifficultyLevel = "beginner" | "intermediate" | "advanced";
+
+const DIFFICULTY_CONFIG: Record<DifficultyLevel, { label: string; color: string; icon: string }> = {
+  beginner: { label: "Iniciante", color: "text-green-500 border-green-500/30 bg-green-500/10", icon: "🌱" },
+  intermediate: { label: "Intermediário", color: "text-yellow-500 border-yellow-500/30 bg-yellow-500/10", icon: "⚡" },
+  advanced: { label: "Avançado", color: "text-red-500 border-red-500/30 bg-red-500/10", icon: "🔥" },
+};
 
 const Challenges = () => {
   const navigate = useNavigate();
@@ -53,7 +62,7 @@ const Challenges = () => {
       // Fetch challenges using secure view (no test_code or solution)
       const { data: challengesData } = await supabase
         .from("challenges_public")
-        .select("id, title, description, template_code, hints, order_index")
+        .select("id, title, description, template_code, hints, order_index, difficulty")
         .order("order_index");
 
       if (challengesData) {
@@ -397,42 +406,75 @@ const Challenges = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-[300px_1fr]">
-          <div className="space-y-3">
-            <h2 className="text-xl font-bold text-foreground mb-4">Desafios</h2>
-            {challenges.map((challenge) => (
-              <Card
-                key={challenge.id}
-                className={`p-4 cursor-pointer transition-all ${
-                  selectedChallenge?.id === challenge.id
-                    ? "border-2 border-primary bg-primary/5"
-                    : "hover:shadow-lg"
-                }`}
-                onClick={() => {
-                  setSelectedChallenge(challenge);
-                  setCode(challenge.template_code || "");
-                  setRevealedHints(0);
-                  setIsDailyChallenge(challenge.id === dailyChallengeId);
-                }}
-              >
-                <h3 className="font-semibold text-foreground">{challenge.title}</h3>
-              </Card>
-            ))}
+          <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+            <h2 className="text-xl font-bold text-foreground">Desafios</h2>
+            
+            {(["beginner", "intermediate", "advanced"] as DifficultyLevel[]).map((difficulty) => {
+              const config = DIFFICULTY_CONFIG[difficulty];
+              const filteredChallenges = challenges.filter(
+                (c) => (c.difficulty || "beginner") === difficulty
+              );
+              
+              if (filteredChallenges.length === 0) return null;
+              
+              return (
+                <div key={difficulty} className="space-y-2">
+                  <div className={`flex items-center gap-2 px-2 py-1 rounded-lg ${config.color}`}>
+                    <span>{config.icon}</span>
+                    <span className="font-semibold text-sm">{config.label}</span>
+                    <Badge variant="outline" className={`ml-auto ${config.color}`}>
+                      {filteredChallenges.length}
+                    </Badge>
+                  </div>
+                  
+                  {filteredChallenges.map((challenge) => (
+                    <Card
+                      key={challenge.id}
+                      className={`p-3 cursor-pointer transition-all ${
+                        selectedChallenge?.id === challenge.id
+                          ? "border-2 border-primary bg-primary/5"
+                          : "hover:shadow-lg hover:bg-muted/50"
+                      }`}
+                      onClick={() => {
+                        setSelectedChallenge(challenge);
+                        setCode(challenge.template_code || "");
+                        setRevealedHints(0);
+                        setIsDailyChallenge(challenge.id === dailyChallengeId);
+                      }}
+                    >
+                      <h3 className="font-medium text-sm text-foreground">{challenge.title}</h3>
+                    </Card>
+                  ))}
+                </div>
+              );
+            })}
           </div>
 
           {selectedChallenge && (
             <div className="space-y-4">
               <Card className="p-6 bg-card">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                   <h2 className="text-2xl font-bold text-foreground">
                     {selectedChallenge.title}
                   </h2>
-                  {isDailyChallenge && (
-                    <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      Desafio do Dia
-                      <Zap className="h-3 w-3 ml-1" />
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {(() => {
+                      const difficulty = (selectedChallenge.difficulty || "beginner") as DifficultyLevel;
+                      const config = DIFFICULTY_CONFIG[difficulty];
+                      return (
+                        <Badge variant="outline" className={config.color}>
+                          {config.icon} {config.label}
+                        </Badge>
+                      );
+                    })()}
+                    {isDailyChallenge && (
+                      <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        Desafio do Dia
+                        <Zap className="h-3 w-3 ml-1" />
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <p className="text-muted-foreground mb-4">
                   {selectedChallenge.description}
