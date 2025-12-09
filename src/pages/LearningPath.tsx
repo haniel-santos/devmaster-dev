@@ -33,9 +33,9 @@ const LearningPath = () => {
         return;
       }
 
-      // Load challenges
+      // Load challenges using secure view (no solution/test_code)
       const { data: challengesData } = await supabase
-        .from("challenges")
+        .from("challenges_public")
         .select("*")
         .order("order_index");
 
