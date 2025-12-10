@@ -9,6 +9,7 @@ import { ArrowLeft, Lightbulb, Calendar, Zap, CheckCircle } from "lucide-react";
 import { EnergyBar } from "@/components/EnergyBar";
 import { EnergyDepletedModal } from "@/components/EnergyDepletedModal";
 import { AchievementNotification } from "@/components/AchievementNotification";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 interface Challenge {
@@ -49,6 +50,7 @@ const Challenges = () => {
   const [revealedHints, setRevealedHints] = useState<number>(0);
   const [isDailyChallenge, setIsDailyChallenge] = useState(false);
   const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
+  const [showOnlyIncomplete, setShowOnlyIncomplete] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -422,13 +424,28 @@ const Challenges = () => {
 
         <div className="grid gap-6 md:grid-cols-[300px_1fr]">
           <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-            <h2 className="text-xl font-bold text-foreground">Desafios</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-foreground">Desafios</h2>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <Checkbox
+                  checked={showOnlyIncomplete}
+                  onCheckedChange={(checked) => setShowOnlyIncomplete(checked === true)}
+                />
+                <span className="text-muted-foreground">Pendentes</span>
+              </label>
+            </div>
             
             {(["beginner", "intermediate", "advanced"] as DifficultyLevel[]).map((difficulty) => {
               const config = DIFFICULTY_CONFIG[difficulty];
-              const filteredChallenges = challenges.filter(
+              let filteredChallenges = challenges.filter(
                 (c) => (c.difficulty || "beginner") === difficulty
               );
+              
+              if (showOnlyIncomplete) {
+                filteredChallenges = filteredChallenges.filter(
+                  (c) => !completedChallenges.has(c.id)
+                );
+              }
               
               if (filteredChallenges.length === 0) return null;
               
